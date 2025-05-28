@@ -11,8 +11,11 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 EXCEL_FILE = "cc_comments_log.xlsx"
 GITHUB_REPO = "Squirrellzy/Repair-Tacker"
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-USERNAME = "maint"
-PASSWORD = "mars"
+USERS = {
+    "aci": "mars",
+    "usps": "mars",
+    "retiina": "mars"
+}
 
 # Login
 st.title("Login")
@@ -20,14 +23,15 @@ login_success = False
 username_input = st.text_input("Username", key="login_user")
 password_input = st.text_input("Password", type="password", key="login_pass")
 
-if username_input == USERNAME and password_input == PASSWORD:
+if username_input in USERS and password_input == USERS[username_input]:
     login_success = True
+    logged_user = username_input
     st.success("Login successful!")
 
 if login_success:
     # Initialize Excel file if not present
     if not os.path.exists(EXCEL_FILE):
-        df_init = pd.DataFrame(columns=["Date", "CC_Subsection", "Description"])
+        df_init = pd.DataFrame(columns=["Date", "User", "CC_Subsection", "Description"])
         df_init.to_excel(EXCEL_FILE, index=False)
 
     st.title("Collection Conveyor Comment Logger")
@@ -45,16 +49,16 @@ if login_success:
         entries = []
         date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if comment_1.strip():
-            entries.append([date, f"{cc_number}-A side 1", comment_1.strip()])
+            entries.append([date, logged_user, f"{cc_number}-A side 1", comment_1.strip()])
         if comment_2.strip():
-            entries.append([date, f"{cc_number}-2", comment_2.strip()])
+            entries.append([date, logged_user, f"{cc_number}-2", comment_2.strip()])
         if comment_3.strip():
-            entries.append([date, f"{cc_number}-3", comment_3.strip()])
+            entries.append([date, logged_user, f"{cc_number}-3", comment_3.strip()])
         if comment_4.strip():
-            entries.append([date, f"{cc_number}-B side 4", comment_4.strip()])
+            entries.append([date, logged_user, f"{cc_number}-B side 4", comment_4.strip()])
 
         if entries:
-            new_df = pd.DataFrame(entries, columns=["Date", "CC_Subsection", "Description"])
+            new_df = pd.DataFrame(entries, columns=["Date", "User", "CC_Subsection", "Description"])
             df_existing = pd.read_excel(EXCEL_FILE)
             df_combined = pd.concat([df_existing, new_df], ignore_index=True)
             df_combined.to_excel(EXCEL_FILE, index=False)
