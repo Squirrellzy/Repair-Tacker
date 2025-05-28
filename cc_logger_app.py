@@ -14,7 +14,8 @@ GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 USERS = {
     "aci": "mars",
     "usps": "mars",
-    "retiina": "mars"
+    "retiina": "mars",
+    "admin": "adminpass"
 }
 
 # Login
@@ -29,6 +30,23 @@ if username_input in USERS and password_input == USERS[username_input]:
     st.success("Login successful!")
 
 if login_success:
+    if logged_user == "admin":
+        st.title("Admin Panel - Full Log Viewer")
+
+        if os.path.exists(EXCEL_FILE):
+            df_admin = pd.read_excel(EXCEL_FILE)
+            st.dataframe(df_admin)
+
+            formatted = format_excel_file(EXCEL_FILE)
+            with open(formatted, "rb") as f:
+                st.download_button(
+                    label="Download Full Excel Log",
+                    data=f,
+                    file_name=formatted,
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        st.stop()
+
     # Initialize Excel file if not present
     if not os.path.exists(EXCEL_FILE):
         df_init = pd.DataFrame(columns=["Date", "User", "CC_Subsection", "Description"])
