@@ -8,7 +8,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Constants
-EXCEL_FILE_TEMPLATE = "cc_comments_log_{site}.xlsx"
+EXCEL_FILE = "cc_comments_log.xlsx"
 GITHUB_REPO = "Squirrellzy/Repair-Tacker"
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 USERS = {
@@ -23,55 +23,15 @@ st.title("Login")
 login_success = False
 username_input = st.text_input("Username", key="login_user")
 password_input = st.text_input("Password", type="password", key="login_pass")
-site = st.selectbox("Select Site", ["Indy", "Chicago", "Atlanta"], key="site_selector")
 
 if username_input in USERS and password_input == USERS[username_input]:
-    EXCEL_FILE = EXCEL_FILE_TEMPLATE.format(site=site)
     login_success = True
     logged_user = username_input
     st.success("Login successful!")
 
-
-def format_excel_file(path):
-        wb = load_workbook(path)
-        ws = wb.active
-        for col in ws.columns:
-            max_len = 0
-            col_letter = get_column_letter(col[0].column)
-            for cell in col:
-                if cell.value:
-                    max_len = max(max_len, len(str(cell.value)))
-            ws.column_dimensions[col_letter].width = max_len + 2
-        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
-        table = Table(displayName="CCLogTable", ref=ref)
-        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
-        table.tableStyleInfo = style
-        ws.add_table(table)
-        formatted_path = "cc_comments_log_formatted.xlsx"
-        wb.save(formatted_path)
-        return formatted_path
-
 if login_success:
-    if logged_user == "admin":
-    st.title("Admin Panel - Full Log Viewer")
-
-    selected_admin_site = st.selectbox("View logs for site:", ["Indy", "Chicago", "Atlanta"], key="admin_site_selector")
-    admin_excel_file = EXCEL_FILE_TEMPLATE.format(site=selected_admin_site)
-
-    if os.path.exists(admin_excel_file):
-        df_admin = pd.read_excel(admin_excel_file)
-        st.dataframe(df_admin)
-
-        formatted = format_excel_file(admin_excel_file)
-        with open(formatted, "rb") as f:
-            st.download_button(
-                label="Download Full Excel Log",
-                data=f,
-                file_name=formatted,
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
-    st.stop()
-                st.title("Admin Panel - Full Log Viewer")
+        if logged_user == "admin":
+        st.title("Admin Panel - Full Log Viewer")
 
         selected_admin_site = st.selectbox("View logs for site:", ["Indy", "Chicago", "Atlanta"], key="admin_site_selector")
         admin_excel_file = EXCEL_FILE_TEMPLATE.format(site=selected_admin_site)
@@ -89,18 +49,7 @@ if login_success:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
         st.stop()
-            df_admin = pd.read_excel(EXCEL_FILE)
-            st.dataframe(df_admin)
 
-            formatted = format_excel_file(EXCEL_FILE)
-            with open(formatted, "rb") as f:
-                st.download_button(
-                    label="Download Full Excel Log",
-                    data=f,
-                    file_name=formatted,
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        st.stop()
 
     # Initialize Excel file if not present
     if not os.path.exists(EXCEL_FILE):
@@ -152,6 +101,25 @@ if login_success:
             st.info("No comments entered.")
 
     # Format Excel for download
+    def format_excel_file(path):
+        wb = load_workbook(path)
+        ws = wb.active
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                if cell.value:
+                    max_len = max(max_len, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_len + 2
+        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+        table = Table(displayName="CCLogTable", ref=ref)
+        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
+        table.tableStyleInfo = style
+        ws.add_table(table)
+        formatted_path = "cc_comments_log_formatted.xlsx"
+        wb.save(formatted_path)
+        return formatted_path
+
     st.markdown("---")
     st.header("Download Log")
     if os.path.exists(EXCEL_FILE):
