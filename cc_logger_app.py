@@ -50,7 +50,6 @@ if login_success:
                 )
         st.stop()
 
-
     # Initialize Excel file if not present
     if not os.path.exists(EXCEL_FILE):
         df_init = pd.DataFrame(columns=["Date", "User", "CC_Subsection", "Description"])
