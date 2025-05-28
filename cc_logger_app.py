@@ -104,10 +104,19 @@ if login_success:
             try:
                 g = Github(GITHUB_TOKEN)
                 repo = g.get_repo(GITHUB_REPO)
+                contents = None
+                try:
+                    contents = repo.get_contents(EXCEL_FILE)
+                except:
+                    contents = None
+
                 with open(EXCEL_FILE, "rb") as f:
                     content = f.read()
-                file = repo.get_contents(EXCEL_FILE)
-                repo.update_file(EXCEL_FILE, "Update log", content, file.sha)
+
+                if contents:
+                    repo.update_file(EXCEL_FILE, "Update log", content, contents.sha)
+                else:
+                    repo.create_file(EXCEL_FILE, "Create log", content)
                 st.success("Excel file updated on GitHub!")
             except Exception as e:
                 st.warning(f"Failed to push to GitHub: {e}")
