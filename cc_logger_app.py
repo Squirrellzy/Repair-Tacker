@@ -63,15 +63,48 @@ if username_input == USERNAME and password_input == PASSWORD:
         else:
             st.error("Please enter a comment before submitting.")
 
-    # Download Button
+
+    # Updated Download Button with Excel Formatting
+    import openpyxl
+    from openpyxl.utils import get_column_letter
+    from openpyxl.worksheet.table import Table, TableStyleInfo
+
+    def format_excel_file(path):
+        wb = openpyxl.load_workbook(path)
+        ws = wb.active
+
+        # Auto-width for columns
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                if cell.value:
+                    max_length = max(max_length, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_length + 2
+
+        # Add Excel Table formatting
+        table_ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+        table = Table(displayName="CCLogTable", ref=table_ref)
+        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
+        table.tableStyleInfo = style
+        ws.add_table(table)
+
+        formatted_path = "cc_comments_log_formatted.xlsx"
+        wb.save(formatted_path)
+        return formatted_path
+
     st.markdown("---")
     st.header("Download Log")
-    with open(EXCEL_FILE, "rb") as f:
-        st.download_button(
-            label="Download Excel Log",
-            data=f,
-            file_name=EXCEL_FILE,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+
+    if os.path.exists(EXCEL_FILE):
+        formatted_path = format_excel_file(EXCEL_FILE)
+        with open(formatted_path, "rb") as f:
+            st.download_button(
+                label="Download Excel Log",
+                data=f,
+                file_name=formatted_path,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+
 else:
     st.warning("Please enter valid credentials.")
