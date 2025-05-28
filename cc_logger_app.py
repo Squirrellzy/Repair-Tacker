@@ -6,10 +6,9 @@ from github import Github
 
 # Constants
 EXCEL_FILE = "cc_comments_log.xlsx"
-GITHUB_REPO = "your-username/your-repo-name"
-GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]  # You can set this in your Streamlit secrets
+GITHUB_REPO = "Squirrellzy/Repair-Tacker"
 USERNAME = "maint"
-PASSWORD = "MaRS"
+PASSWORD = "mars"
 
 # Login
 st.title("Login")
