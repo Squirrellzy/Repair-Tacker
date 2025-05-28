@@ -28,26 +28,34 @@ if username_input == USERNAME and password_input == PASSWORD:
     st.title("Collection Conveyor Comment Logger")
 
     # Conveyor Selection
+    cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)])# Conveyor Selection
     cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)])
-    subsection = st.selectbox("Select Subsection", ["A side 1", "2", "3", "B side 4"])
 
-    # Comment Input
-    comment = st.text_area("Enter Comment")
+    # Comment boxes for each subsection
+    comment_1 = st.text_area("A side 1 Comment")
+    comment_2 = st.text_area("2 Comment")
+    comment_3 = st.text_area("3 Comment")
+    comment_4 = st.text_area("B side 4 Comment")
 
     # Submit
     if st.button("Submit Comment"):
-        if comment.strip():
-            # Prepare new entry
-            date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            cc_subsection = f"{cc_number}-{subsection}"
-            new_entry = pd.DataFrame([[date, cc_subsection, comment.strip()]], columns=["Date", "CC_Subsection", "Description"])
+        entries = []
+        date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        if comment_1.strip():
+            entries.append([date, f"{cc_number}-A side 1", comment_1.strip()])
+        if comment_2.strip():
+            entries.append([date, f"{cc_number}-2", comment_2.strip()])
+        if comment_3.strip():
+            entries.append([date, f"{cc_number}-3", comment_3.strip()])
+        if comment_4.strip():
+            entries.append([date, f"{cc_number}-B side 4", comment_4.strip()])
 
-            # Append to Excel
+        if entries:
+            new_entries_df = pd.DataFrame(entries, columns=["Date", "CC_Subsection", "Description"])
             df_existing = pd.read_excel(EXCEL_FILE)
-            df_combined = pd.concat([df_existing, new_entry], ignore_index=True)
+            df_combined = pd.concat([df_existing, new_entries_df], ignore_index=True)
             df_combined.to_excel(EXCEL_FILE, index=False)
-
-            st.success("Comment logged successfully!")
+            st.success("Comment(s) logged successfully!")
 
             # Push to GitHub
             try:
@@ -61,7 +69,7 @@ if username_input == USERNAME and password_input == PASSWORD:
             except Exception as e:
                 st.warning(f"Failed to push to GitHub: {e}")
         else:
-            st.error("Please enter a comment before submitting.")
+            st.info("No comments entered.")
 
     # Download Button
     st.markdown("---")
