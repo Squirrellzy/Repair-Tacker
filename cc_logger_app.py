@@ -28,14 +28,14 @@ if username_input == USERNAME and password_input == PASSWORD:
     st.title("Collection Conveyor Comment Logger")
 
     # Conveyor Selection
-    cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)])# Conveyor Selection
-    cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)])
+    cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)], key="cc_selector")# Conveyor Selection
+    cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)], key="cc_selector")
 
     # Comment boxes for each subsection
-    comment_1 = st.text_area("A side 1 Comment")
-    comment_2 = st.text_area("2 Comment")
-    comment_3 = st.text_area("3 Comment")
-    comment_4 = st.text_area("B side 4 Comment")
+    comment_1 = st.text_area("A side 1 Comment", key="comment_1")
+    comment_2 = st.text_area("2 Comment", key="comment_2")
+    comment_3 = st.text_area("3 Comment", key="comment_3")
+    comment_4 = st.text_area("B side 4 Comment", key="comment_4")
 
     # Submit
     if st.button("Submit Comment"):
