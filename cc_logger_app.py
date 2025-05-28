@@ -15,7 +15,7 @@ USERS = {
     "aci": "mars",
     "usps": "mars",
     "retiina": "mars",
-    "admin": "adminpass"
+    "admin": "Ret1B"
 }
 
 # Login
