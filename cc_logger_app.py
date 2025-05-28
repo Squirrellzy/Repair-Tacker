@@ -53,6 +53,24 @@ def format_excel_file(path):
 
 if login_success:
     if logged_user == "admin":
+    st.title("Admin Panel - Full Log Viewer")
+
+    selected_admin_site = st.selectbox("View logs for site:", ["Indy", "Chicago", "Atlanta"], key="admin_site_selector")
+    admin_excel_file = EXCEL_FILE_TEMPLATE.format(site=selected_admin_site)
+
+    if os.path.exists(admin_excel_file):
+        df_admin = pd.read_excel(admin_excel_file)
+        st.dataframe(df_admin)
+
+        formatted = format_excel_file(admin_excel_file)
+        with open(formatted, "rb") as f:
+            st.download_button(
+                label="Download Full Excel Log",
+                data=f,
+                file_name=formatted,
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
+    st.stop()
                 st.title("Admin Panel - Full Log Viewer")
 
         selected_admin_site = st.selectbox("View logs for site:", ["Indy", "Chicago", "Atlanta"], key="admin_site_selector")
