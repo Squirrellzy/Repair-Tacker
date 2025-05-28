@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -8,31 +9,51 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.table import Table, TableStyleInfo
 
 # Constants
-EXCEL_FILE = "cc_comments_log.xlsx"
 GITHUB_REPO = "Squirrellzy/Repair-Tacker"
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-USERS = {
+USERS = {{
     "aci": "mars",
     "usps": "mars",
     "retiina": "mars",
     "admin": "adminpass"
-}
+}}
 
 # Login
 st.title("Login")
 login_success = False
 username_input = st.text_input("Username", key="login_user")
 password_input = st.text_input("Password", type="password", key="login_pass")
+site = st.selectbox("Select Site", ["Indy", "Chicago", "Atlanta"], key="site_selector")
+EXCEL_FILE_TEMPLATE = "cc_comments_log_{site}.xlsx"
 
 if username_input in USERS and password_input == USERS[username_input]:
     login_success = True
     logged_user = username_input
+    EXCEL_FILE = EXCEL_FILE_TEMPLATE.format(site=site)
     st.success("Login successful!")
 
 if login_success:
-        if logged_user == "admin":
-        st.title("Admin Panel - Full Log Viewer")
+    def format_excel_file(path):
+        wb = load_workbook(path)
+        ws = wb.active
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                if cell.value:
+                    max_len = max(max_len, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_len + 2
+        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+        table = Table(displayName="CCLogTable", ref=ref)
+        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
+        table.tableStyleInfo = style
+        ws.add_table(table)
+        formatted_path = f"cc_comments_log_formatted_{site}.xlsx"
+        wb.save(formatted_path)
+        return formatted_path
 
+    if logged_user == "admin":
+        st.title("Admin Panel - Full Log Viewer")
         selected_admin_site = st.selectbox("View logs for site:", ["Indy", "Chicago", "Atlanta"], key="admin_site_selector")
         admin_excel_file = EXCEL_FILE_TEMPLATE.format(site=selected_admin_site)
 
@@ -50,17 +71,12 @@ if login_success:
                 )
         st.stop()
 
-    # Initialize Excel file if not present
     if not os.path.exists(EXCEL_FILE):
         df_init = pd.DataFrame(columns=["Date", "User", "CC_Subsection", "Description"])
         df_init.to_excel(EXCEL_FILE, index=False)
 
     st.title("Collection Conveyor Comment Logger")
-
-    # Conveyor Selection
     cc_number = st.selectbox("Select Collection Conveyor", [f"CC-{i}" for i in range(1, 78)], key="main_cc_selector")
-
-    # Comment boxes for each subsection
     comment_1 = st.text_area("A side 1 Comment", key="main_comment_1")
     comment_2 = st.text_area("2 Comment", key="main_comment_2")
     comment_3 = st.text_area("3 Comment", key="main_comment_3")
@@ -85,7 +101,6 @@ if login_success:
             df_combined.to_excel(EXCEL_FILE, index=False)
             st.success("Comment(s) logged successfully!")
 
-            # Push to GitHub
             try:
                 g = Github(GITHUB_TOKEN)
                 repo = g.get_repo(GITHUB_REPO)
@@ -98,26 +113,6 @@ if login_success:
                 st.warning(f"Failed to push to GitHub: {e}")
         else:
             st.info("No comments entered.")
-
-    # Format Excel for download
-    def format_excel_file(path):
-        wb = load_workbook(path)
-        ws = wb.active
-        for col in ws.columns:
-            max_len = 0
-            col_letter = get_column_letter(col[0].column)
-            for cell in col:
-                if cell.value:
-                    max_len = max(max_len, len(str(cell.value)))
-            ws.column_dimensions[col_letter].width = max_len + 2
-        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
-        table = Table(displayName="CCLogTable", ref=ref)
-        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
-        table.tableStyleInfo = style
-        ws.add_table(table)
-        formatted_path = "cc_comments_log_formatted.xlsx"
-        wb.save(formatted_path)
-        return formatted_path
 
     st.markdown("---")
     st.header("Download Log")
