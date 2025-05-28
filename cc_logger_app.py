@@ -29,6 +29,26 @@ if username_input in USERS and password_input == USERS[username_input]:
     logged_user = username_input
     st.success("Login successful!")
 
+
+def format_excel_file(path):
+        wb = load_workbook(path)
+        ws = wb.active
+        for col in ws.columns:
+            max_len = 0
+            col_letter = get_column_letter(col[0].column)
+            for cell in col:
+                if cell.value:
+                    max_len = max(max_len, len(str(cell.value)))
+            ws.column_dimensions[col_letter].width = max_len + 2
+        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
+        table = Table(displayName="CCLogTable", ref=ref)
+        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
+        table.tableStyleInfo = style
+        ws.add_table(table)
+        formatted_path = "cc_comments_log_formatted.xlsx"
+        wb.save(formatted_path)
+        return formatted_path
+
 if login_success:
     if logged_user == "admin":
         st.title("Admin Panel - Full Log Viewer")
@@ -97,25 +117,6 @@ if login_success:
             st.info("No comments entered.")
 
     # Format Excel for download
-    def format_excel_file(path):
-        wb = load_workbook(path)
-        ws = wb.active
-        for col in ws.columns:
-            max_len = 0
-            col_letter = get_column_letter(col[0].column)
-            for cell in col:
-                if cell.value:
-                    max_len = max(max_len, len(str(cell.value)))
-            ws.column_dimensions[col_letter].width = max_len + 2
-        ref = f"A1:{get_column_letter(ws.max_column)}{ws.max_row}"
-        table = Table(displayName="CCLogTable", ref=ref)
-        style = TableStyleInfo(name="TableStyleMedium9", showRowStripes=True)
-        table.tableStyleInfo = style
-        ws.add_table(table)
-        formatted_path = "cc_comments_log_formatted.xlsx"
-        wb.save(formatted_path)
-        return formatted_path
-
     st.markdown("---")
     st.header("Download Log")
     if os.path.exists(EXCEL_FILE):
