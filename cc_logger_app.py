@@ -11,12 +11,12 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 # Constants
 GITHUB_REPO = "Squirrellzy/Repair-Tacker"
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
-USERS = {{
+USERS = {
     "aci": "mars",
     "usps": "mars",
     "retiina": "mars",
     "admin": "adminpass"
-}}
+}
 
 # Login
 st.title("Login")
